@@ -6,3 +6,5 @@ formemo.js
 /database
 .env
 .env_sample
+*.pem
+/prisma

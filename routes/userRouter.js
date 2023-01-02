@@ -8,31 +8,34 @@ const userController = require('../controllers/userController');
 
 //회원가입
 router.post(
-  '/signup',
-  upload.single('profile'),
-  asyncWrap(userController.createUser)
+	'/signup',
+	upload.single('profile'),
+	asyncWrap(userController.createUser)
 );
 
 //로그인
 router.post('/login', asyncWrap(userController.loginUser));
 //계정정보조회페이지
 router.post(
-  '/accountInfo',
-  asyncWrap(validateToken),
-  asyncWrap(userController.getAccountInfo)
+	'/accountInfo',
+	asyncWrap(validateToken),
+	asyncWrap(userController.getAccountInfo)
 );
 
 //계정정보수정
 router.patch(
-  '/accountInfo',
-  asyncWrap(validateToken),
-  asyncWrap(userController.modifyAccountInfo)
+	'/accountInfo',
+	asyncWrap(validateToken),
+	asyncWrap(userController.modifyAccountInfo)
 );
 //계정삭제
 router.delete(
-  '/accountInfo',
-  asyncWrap(validateToken),
-  asyncWrap(userController.deleteAccount)
+	'/accountInfo',
+	asyncWrap(validateToken),
+	asyncWrap(userController.deleteAccount)
 );
 
+router.get('/ping', (req, res) => {
+	res.json({ message: 'pong' });
+});
 module.exports = router;
