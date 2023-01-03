@@ -55,11 +55,11 @@ const findQueryWorksFeedList = `
     `;
 
 const getWorkList = async (isSelect, sortOfOrder) => {
-  const categorySortCountList = await myDataSource.query(
-    `${findQueryCatagorySortCountList}`
-  );
-  const worksFeedList = await myDataSource.query(
-    `${findQueryWorksFeedList}
+	const categorySortCountList = await myDataSource.query(
+		`${findQueryCatagorySortCountList}`
+	);
+	const worksFeedList = await myDataSource.query(
+		`${findQueryWorksFeedList}
         SELECT 
         ${isSelect}
         wp.id, 
@@ -82,15 +82,15 @@ const getWorkList = async (isSelect, sortOfOrder) => {
         ON b.id = wp.id
       ${sortOfOrder}
       `
-  );
-  return { categorySortCountList, worksFeedList };
+	);
+	return { categorySortCountList, worksFeedList };
 };
 
 // feed 상세
-const getFeed = async id => {
-  // feed img_url 배열(다수의 이미지가 있을 시)
-  let feedImgArr = await myDataSource.query(
-    `
+const getFeed = async (id) => {
+	// feed img_url 배열(다수의 이미지가 있을 시)
+	let feedImgArr = await myDataSource.query(
+		`
       SELECT
         COUNT(uf.upload_url) file_cnt,
         JSON_ARRAYAGG(
@@ -109,18 +109,18 @@ const getFeed = async id => {
         uf.posting_id = ?
         AND uf.file_sort_id = 1
       `,
-    [id]
-  );
-  feedImgArr = [...feedImgArr].map(item => {
-    return {
-      ...item,
-      fileInfo: JSON.parse(item.fileInfo),
-    };
-  });
+		[id]
+	);
+	feedImgArr = [...feedImgArr].map((item) => {
+		return {
+			...item,
+			fileInfo: JSON.parse(item.fileInfo),
+		};
+	});
 
-  // feed 정보와 사용자 정보 + 태그 카운트
-  let feedWithTags = await myDataSource.query(
-    `
+	// feed 정보와 사용자 정보 + 태그 카운트
+	let feedWithTags = await myDataSource.query(
+		`
       SELECT
         wp.id, 
         wp.user_id,
@@ -154,18 +154,18 @@ const getFeed = async id => {
       WHERE
         wp.id = ?
       `,
-    [id]
-  );
+		[id]
+	);
 
-  feedWithTags = [...feedWithTags].map(item => {
-    return {
-      ...item,
-      tagInfo: JSON.parse(item.tagInfo),
-    };
-  });
+	feedWithTags = [...feedWithTags].map((item) => {
+		return {
+			...item,
+			tagInfo: JSON.parse(item.tagInfo),
+		};
+	});
 
-  let feedCommentInfo = await myDataSource.query(
-    `
+	let feedCommentInfo = await myDataSource.query(
+		`
       SELECT
         c.id,
         c.user_id,
@@ -184,12 +184,12 @@ const getFeed = async id => {
       ORDER BY
         created_at ASC      
       `,
-    [id]
-  );
+		[id]
+	);
 
-  // feed 글쓴이의 다른 작품들
-  let moreFeedinfo = await myDataSource.query(
-    `
+	// feed 글쓴이의 다른 작품들
+	let moreFeedinfo = await myDataSource.query(
+		`
       WITH tables1 AS (
         SELECT
           id,
@@ -246,18 +246,18 @@ const getFeed = async id => {
         wp.user_id = b.user_id
         AND NOT wp.id = ?
       `,
-    [id, id]
-  );
-  moreFeedinfo = [...moreFeedinfo].map(item => {
-    return {
-      ...item,
-      more_feed: JSON.parse(item.more_feed),
-    };
-  });
+		[id, id]
+	);
+	moreFeedinfo = [...moreFeedinfo].map((item) => {
+		return {
+			...item,
+			more_feed: JSON.parse(item.more_feed),
+		};
+	});
 
-  // feed 글쓴이에 대한 팔로워 정보
-  let writerInfo = await myDataSource.query(
-    `
+	// feed 글쓴이에 대한 팔로워 정보
+	let writerInfo = await myDataSource.query(
+		`
       SELECT
         wp.id,
         u.id AS id,
@@ -321,20 +321,20 @@ const getFeed = async id => {
       WHERE
         wp.id = ?
       `,
-    [id, id, id]
-  );
+		[id, id, id]
+	);
 
-  writerInfo = [...writerInfo].map(item => {
-    return {
-      ...item,
-      follower_list: JSON.parse(item.follower_list),
-      following_list: JSON.parse(item.following_list),
-    };
-  });
+	writerInfo = [...writerInfo].map((item) => {
+		return {
+			...item,
+			follower_list: JSON.parse(item.follower_list),
+			following_list: JSON.parse(item.following_list),
+		};
+	});
 
-  // feed + 총 공감수
-  let sympathyCount = await myDataSource.query(
-    `
+	// feed + 총 공감수
+	let sympathyCount = await myDataSource.query(
+		`
       SELECT
         COUNT(*) AS total_sympathy_cnt
       FROM
@@ -348,12 +348,12 @@ const getFeed = async id => {
       WHERE
         wp.id = ?
       `,
-    [id]
-  );
+		[id]
+	);
 
-  // feed + 공감별 개수
-  let sympathySortCount = await myDataSource.query(
-    `
+	// feed + 공감별 개수
+	let sympathySortCount = await myDataSource.query(
+		`
       WITH tables AS (
         SELECT
           wp.id id,
@@ -382,11 +382,11 @@ const getFeed = async id => {
       LEFT JOIN tables a ON
         a.sympathy_sort = ws.sympathy_sort
       `,
-    [id]
-  );
+		[id]
+	);
 
-  let anotherFeedList = await myDataSource.query(
-    `
+	let anotherFeedList = await myDataSource.query(
+		`
       WITH tables1 AS (
         SELECT
           wp.id AS id,
@@ -459,12 +459,12 @@ const getFeed = async id => {
       ORDER BY
         wp.created_at DESC
       `,
-    [id]
-  );
+		[id]
+	);
 
-  // 조회수 카운팅 (IP주소나 시간만료 같은 장치는 아직 없음.)
-  await myDataSource.query(
-    `
+	// 조회수 카운팅 (IP주소나 시간만료 같은 장치는 아직 없음.)
+	await myDataSource.query(
+		`
       UPDATE
         Works_Posting
       SET
@@ -472,90 +472,90 @@ const getFeed = async id => {
       WHERE
         id = ?
       `,
-    [id]
-  );
+		[id]
+	);
 
-  let result = {
-    feedImgArr,
-    feedWithTags,
-    feedCommentInfo,
-    moreFeedinfo,
-    writerInfo,
-    sympathyCount,
-    sympathySortCount,
-    anotherFeedList,
-  };
-  return result;
+	let result = {
+		feedImgArr,
+		feedWithTags,
+		feedCommentInfo,
+		moreFeedinfo,
+		writerInfo,
+		sympathyCount,
+		sympathySortCount,
+		anotherFeedList,
+	};
+	return result;
 };
 
-const deletefeed = async posting_id => {
-  // const selectedFiles = await myDataSource.query(
-  //   `SELECT upload_url FROM upload_file where posting_id =(?)`,
-  //   [posting_id]
-  // );
+const deletefeed = async (posting_id) => {
+	// const selectedFiles = await myDataSource.query(
+	//   `SELECT upload_url FROM upload_file where posting_id =(?)`,
+	//   [posting_id]
+	// );
 
-  // let selectedFilesURLBasket = [];
-  // for (let i = 0; i < selectedFiles.length; i++) {
-  //   let filename = selectedFiles[i].upload_url.slice(59);
-  //   selectedFilesURLBasket.push(filename);
-  // }
+	// let selectedFilesURLBasket = [];
+	// for (let i = 0; i < selectedFiles.length; i++) {
+	//   let filename = selectedFiles[i].upload_url.slice(59);
+	//   selectedFilesURLBasket.push(filename);
+	// }
 
-  // s3.deleteObject(
-  //   {
-  //     Bucket: 'photofolio-renewal',
-  //     Key: 'a',
-  //   },
-  //   (err, data) => {
-  //     if (err) {
-  //       throw err;
-  //     }
-  //     console.log('s3 deleteObject ', data);
-  //   }
-  // );
+	// s3.deleteObject(
+	//   {
+	//     Bucket: 'photofolio-renewal',
+	//     Key: 'a',
+	//   },
+	//   (err, data) => {
+	//     if (err) {
+	//       throw err;
+	//     }
+	//     console.log('s3 deleteObject ', data);
+	//   }
+	// );
 
-  const tagsIdsOnSelectedPost = await myDataSource.query(
-    `SELECT tag_id FROM Works_Posting_tags wpt WHERE posting_id = (?)`, //<---sql
-    [posting_id]
-  );
-  let tagIdBasket = [];
-  for (let i = 0; i < tagsIdsOnSelectedPost.length; i++) {
-    tagIdBasket.push(tagsIdsOnSelectedPost[i].tag_id);
-  }
-  let tagsShouldBeDeletedFromDB = [];
-  for (let i = 0; i < tagIdBasket.length; i++) {
-    let tagCountForDesignatedArticle = await myDataSource.query(
-      `SELECT tag_id FROM Works_Posting_tags wpt WHERE tag_id = ${tagIdBasket[i]}`
-    );
-    if (tagCountForDesignatedArticle.length < 2) {
-      tagsShouldBeDeletedFromDB.push(tagCountForDesignatedArticle);
-    }
-  }
-  await myDataSource.query(
-    `DELETE FROM Works_Posting_tags WHERE posting_id = (?)`,
-    [posting_id]
-  );
-  for (let i = 0; i < tagsShouldBeDeletedFromDB.length; i++) {
-    await myDataSource.query(
-      `DELETE FROM Works_Tag_names WHERE id = ${tagsShouldBeDeletedFromDB[i][0].tag_id}`
-    );
-  }
-  await myDataSource.query(`DELETE FROM Comment WHERE posting_id = (?)`, [
-    posting_id,
-  ]);
-  await myDataSource.query(
-    `DELETE FROM Works_Sympathy_Count WHERE posting_id = (?)`,
-    [posting_id]
-  );
-  await myDataSource.query(`DELETE FROM upload_file WHERE posting_id = (?)`, [
-    posting_id,
-  ]);
-  await myDataSource.query(`DELETE FROM Works_posting WHERE id = (?)`, [
-    posting_id,
-  ]);
+	const tagsIdsOnSelectedPost = await myDataSource.query(
+		`SELECT tag_id FROM Works_Posting_tags wpt WHERE posting_id = (?)`, //<---sql
+		[posting_id]
+	);
+	let tagIdBasket = [];
+	for (let i = 0; i < tagsIdsOnSelectedPost.length; i++) {
+		tagIdBasket.push(tagsIdsOnSelectedPost[i].tag_id);
+	}
+	let tagsShouldBeDeletedFromDB = [];
+	for (let i = 0; i < tagIdBasket.length; i++) {
+		let tagCountForDesignatedArticle = await myDataSource.query(
+			`SELECT tag_id FROM Works_Posting_tags wpt WHERE tag_id = ${tagIdBasket[i]}`
+		);
+		if (tagCountForDesignatedArticle.length < 2) {
+			tagsShouldBeDeletedFromDB.push(tagCountForDesignatedArticle);
+		}
+	}
+	await myDataSource.query(
+		`DELETE FROM Works_Posting_tags WHERE posting_id = (?)`,
+		[posting_id]
+	);
+	for (let i = 0; i < tagsShouldBeDeletedFromDB.length; i++) {
+		await myDataSource.query(
+			`DELETE FROM Works_tag_names WHERE id = ${tagsShouldBeDeletedFromDB[i][0].tag_id}`
+		);
+	}
+	await myDataSource.query(`DELETE FROM Comment WHERE posting_id = (?)`, [
+		posting_id,
+	]);
+	await myDataSource.query(
+		`DELETE FROM Works_Sympathy_Count WHERE posting_id = (?)`,
+		[posting_id]
+	);
+	await myDataSource.query(`DELETE FROM upload_file WHERE posting_id = (?)`, [
+		posting_id,
+	]);
+	await myDataSource.query(`DELETE FROM Works_Posting WHERE id = (?)`, [
+		posting_id,
+	]);
 };
 
 module.exports = {
-  getWorkList,
-  getFeed,
-  deletefeed,
+	getWorkList,
+	getFeed,
+	deletefeed,
 };
